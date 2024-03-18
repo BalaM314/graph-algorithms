@@ -1,70 +1,5 @@
-"use strict";
-class Graph {
-    nodes = new Set();
-    edges = new Set();
-    nodesNamed;
-    constructor(builder, defaultVal) {
-        const output = builder((value = defaultVal()) => {
-            const node = new GNode(value, []);
-            this.nodes.add(node);
-            return node;
-        }, (a, b, value) => {
-            const edge = new Edge(a, b, value);
-            a.edges.push(edge);
-            b.edges.push(edge);
-            this.edges.add(edge);
-            return edge;
-        });
-        const nodesNamed = Object.entries(output);
-        for (const [k, v] of nodesNamed) {
-            v.name = k;
-        }
-        this.nodesNamed = new Map(nodesNamed);
-    }
-    max(func, filter) {
-        let maxScore = -Infinity;
-        let maxNode = null;
-        this.nodes.forEach(n => {
-            if (filter && !filter(n))
-                return;
-            const score = func(n);
-            if (score > maxScore) {
-                maxScore = score;
-                maxNode = n;
-            }
-        });
-        return maxNode;
-    }
-}
-class GNode {
-    value;
-    edges;
-    name;
-    constructor(value, edges) {
-        this.value = value;
-        this.edges = edges;
-    }
-    *connections() {
-        for (const edge of this.edges) {
-            yield [edge.opposite(this), edge];
-        }
-    }
-}
-class Edge {
-    a;
-    b;
-    value;
-    constructor(a, b, value) {
-        this.a = a;
-        this.b = b;
-        this.value = value;
-    }
-    opposite(node) {
-        if (node == this.a)
-            return this.b;
-        return this.a;
-    }
-}
+import { crash } from "./src/funcs.js";
+import { Graph } from "./src/graph.js";
 const graph = new Graph((node, edge) => {
     const base = node();
     const t1 = node();
@@ -101,22 +36,23 @@ function dijkstra(graph, source, target) {
                 node.value[1].push(currentNode.value[0] + edge.value);
             }
         }
-        currentNode = graph.max(n => -(n.value[1].at(-1) ?? Infinity), n => n.value[0] == null); //Find the lowest working value that is not a final value
+        //Find the lowest working value that is not a final value
+        currentNode = graph.max(n => -(n.value[1].at(-1) ?? Infinity), n => n.value[0] == null);
     }
-    let reversedPath = [];
+    let reversedPath = [targetNode];
     currentNode = targetNode;
     nextNode: while (currentNode != sourceNode) {
         for (const [node, edge] of currentNode.connections()) {
             if (node.value[0] === null || currentNode.value[0] === null)
-                throw new Error(`Impossible`);
+                crash(`Impossible`);
             if (currentNode.value[0] - edge.value == node.value[0]) {
                 currentNode = node;
-                reversedPath.push(edge);
+                reversedPath.push(node);
                 continue nextNode;
             }
         }
         console.log(currentNode);
-        throw new Error(`Cannot find path from node ${currentNode.name}`);
+        crash(`Cannot find path from node ${currentNode.name}`);
     }
     return reversedPath.reverse();
 }

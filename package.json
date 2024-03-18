@@ -11,5 +11,6 @@
   "license": "ISC",
   "devDependencies": {
     "typescript": "^5.4.2"
-  }
+  },
+  "type": "module"
 }
