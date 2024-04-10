@@ -116,6 +116,7 @@ function aStar(graph:Graph<AData>, heuristic:(node:GNode<AData>) => number, sour
 	sourceNode.value.totalScore = heuristic(sourceNode);
 	let currentNode:GNode<ADataFinal> | null = sourceNode as GNode<ADataFinal>;
 	while(currentNode && currentNode != targetNode){ //if the lowest working score is the target node, there cannot be any lower path so the search is complete
+		console.log(`Exploring ${currentNode.name}`);
 		currentNode.value.movementCostFinalized = true;
 		for(const [node, edge] of currentNode.connections()){
 			node.value.movementCost = Math.min(node.value.movementCost ?? Infinity, currentNode.value.movementCost + edge.value);
@@ -144,5 +145,5 @@ function aStar(graph:Graph<AData>, heuristic:(node:GNode<AData>) => number, sour
 }
 
 //n => n.edges.reduce((acc, e) => Math.min(acc, e.value), Infinity)
-console.log(aStar(graph2, graph2heuristic, "begin", "end"));
+console.log(aStar(graph2, graph2heuristic, "begin", "end").map(n => n.name));
 // console.log(graph2.nodes);
